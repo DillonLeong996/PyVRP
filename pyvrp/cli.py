@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 from tqdm.contrib.concurrent import process_map
 
-from pyvrp import ProblemData, Result, SolveParams, solve
+from pyvrp import ProblemData, Result, SolveParams, solve, SolveParamsQci, solveqci
 from pyvrp.read import ROUND_FUNCS, read
 from pyvrp.stop import (
     MaxIterations,
@@ -133,6 +133,88 @@ def _solve(
     )
 
     result = solve(data, stop, seed, bool(stats_dir), params=params)
+    instance_name = data_loc.stem
+
+    if stats_dir:
+        stats_dir.mkdir(parents=True, exist_ok=True)  # just in case
+        result.stats.to_csv(stats_dir / (instance_name + ".csv"))
+
+    if sol_dir:
+        sol_dir.mkdir(parents=True, exist_ok=True)  # just in case
+        write_solution(sol_dir / (instance_name + ".sol"), data, result)
+
+    return (
+        instance_name,
+        "Y" if result.is_feasible() else "N",
+        round(result.cost(), 2),
+        result.num_iterations,
+        round(result.runtime, 3),
+    )
+
+def _solveqci(
+    data_loc: Path,
+    round_func: str,
+    seed: int,
+    max_runtime: float,
+    max_iterations: int,
+    no_improvement: int,
+    per_client: bool,
+    stats_dir: Path | None,
+    sol_dir: Path | None,
+    **kwargs,
+) -> tuple[str, str, float, int, float]:
+    """
+    Solves a single VRPLIB instance.
+
+    Parameters
+    ----------
+    data_loc
+        Filesystem location of the VRPLIB instance.
+    round_func
+        Rounding function to use for rounding non-integral data. Argument is
+        passed to ``read()``.
+    seed
+        Seed to use for the RNG.
+    max_runtime
+        Maximum runtime (in seconds) for solving.
+    max_iterations
+        Maximum number of iterations for solving.
+    no_improvement
+        Maximum number of iterations without improvement.
+    per_client
+        Whether to scale stopping criteria values by the number of clients.
+    stats_dir
+        The directory to write runtime statistics to.
+    sol_dir
+        The directory to write the best found solutions to.
+
+    Returns
+    -------
+    tuple[str, str, float, int, float]
+        A tuple containing the instance name, whether the solution is feasible,
+        the solution cost, the number of iterations, and the runtime.
+    """
+    if kwargs.get("config_loc"):
+        params = SolveParamsQci.from_file(kwargs["config_loc"])
+    else:
+        params = SolveParamsQci()
+
+    data = read(data_loc, round_func)
+
+    if per_client:
+        max_runtime *= data.num_clients
+        max_iterations *= data.num_clients
+        no_improvement *= data.num_clients
+
+    stop = MultipleCriteria(
+        [
+            MaxRuntime(max_runtime),
+            MaxIterations(max_iterations),
+            NoImprovement(no_improvement),
+        ]
+    )
+
+    result = solveqci(data, stop, seed, bool(stats_dir), params=params)
     instance_name = data_loc.stem
 
     if stats_dir:

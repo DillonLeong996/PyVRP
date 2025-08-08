@@ -6,6 +6,7 @@ from statistics import fmean
 from time import perf_counter
 
 from pyvrp.Population import Population, SubPopulation
+from pyvrp.PopulationQCI import PopulationQCI
 from pyvrp._pyvrp import CostEvaluator
 
 _FEAS_CSV_PREFIX = "feas_"
@@ -58,7 +59,7 @@ class Statistics:
     feas_stats: list[_Datum]
     infeas_stats: list[_Datum]
 
-    def __init__(self, collect_stats: bool = True):
+    def __init__(self, collect_stats: bool = True,):
         self.runtimes = []
         self.num_iterations = 0
         self.feas_stats = []
@@ -112,6 +113,44 @@ class Statistics:
         infeas_subpop = population._infeas  # noqa: SLF001
         infeas_datum = self._collect_from_subpop(infeas_subpop, cost_evaluator)
         self.infeas_stats.append(infeas_datum)
+
+    def collect_from_qci(
+        self, population: PopulationQCI, cost_evaluator: CostEvaluator
+    ):
+        """
+        Collects statistics from the given population object.
+
+        Parameters
+        ----------
+        population
+            Population instance to collect statistics from.
+        cost_evaluator
+            CostEvaluator used to compute costs for solutions.
+        """
+        if not self._collect_stats:
+            return
+
+        start = self._clock
+        self._clock = perf_counter()
+
+        self.runtimes.append(self._clock - start)
+        self.num_iterations += 1
+
+        # The following lines access private members of the population, but in
+        # this case that is mostly OK: we really want to have that access to
+        # enable detailed statistics logging.
+        feas_subpop = population._obsfeas  # noqa: SLF001
+        #for i in range(algo_params.num_of_qubits):
+        for i in range(3):
+            feas_datum = self._collect_from_subpop(feas_subpop[i], cost_evaluator)
+        self.feas_stats.append(feas_datum)
+
+        infeas_subpop = population._obsinfeas  # noqa: SLF001
+        #for i in range(algo_params.num_of_qubits):
+        for i in range(3):
+            infeas_datum = self._collect_from_subpop(infeas_subpop[i], cost_evaluator)
+        self.infeas_stats.append(infeas_datum)
+
 
     def _collect_from_subpop(
         self, subpop: SubPopulation, cost_evaluator: CostEvaluator

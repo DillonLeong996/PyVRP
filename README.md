@@ -1,3 +1,28 @@
+### This attempt is a project that aims to utilize Quantum-Inspired Evolutionary Algorithm in PyVRP
+
+The algorithm is demonstrated majorly on two files:
+- PopulationQCI.py
+- QuantumInspiredGeneticAlgorithm.py
+
+Within the QuantumInspiredGeneticAlgorithm there exists a modified version of GeneticAlgorithm.py that aims to implement QuantumInspired algorithm into the system. The language used for coding is Python. The implementation is majorly overhauling the algorithm to utilize Qubits-like structures for storing information. 
+
+Unlike traditional classic bits, Qubits can store up to multiple information simultaneously. The implementation of the algorithm is with 3 bits and 2 states, enabling an individual qubit to store up to 8 information simultaneously. 
+
+Within PopulationQCI, there exists the observation feature, which quantized qubits into states of ones and zeros to obtain classical information relevant to be used for comparison and finding best fitness.
+
+Unlike traditional Genetic Algorithm method of crossover or mutation, Quantum-Inspired algorithm utilizes Quantum Gates and able to manipulate information states, or quantum angles, to more likely to shift to a different states during observation. This enables variety and preserves the algorithm from falling into local optimum.
+
+When selecting Qubits for crossover, a tournament stage was held to select two Individuals, likely to have the best fitness (not yet implemented), for crossover. A mutation operator which utilizes a CNOT-quantum gate is also implemented for the mutation factor.
+
+For each iteration, the system takes the all of the solution from the qubits and identify the best fit. If it does not satisfy the requirement. Run one more iteration.
+
+### Completion Stage: Features are implemented, but cannot run
+
+The code within the files shows all the necessary feature for implementing a Quantum-Inspired Evolutionary Algorithm. However, due to the lack of skills to accomplish the project within the given time frame, a redesign is likely required to get it operable.
+
+Platform used: Google Colab.
+File used for testing: basic_vrps_qci_test.ipynb
+
 ![PyVRP logo](docs/source/assets/images/logo.svg)
 
 [![PyPI version](https://img.shields.io/pypi/v/PyVRP?style=flat-square&label=PyPI)](https://pypi.org/project/pyvrp/)

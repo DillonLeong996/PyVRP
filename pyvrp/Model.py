@@ -15,6 +15,7 @@ from pyvrp._pyvrp import (
 from pyvrp.constants import MAX_VALUE
 from pyvrp.exceptions import ScalingWarning
 from pyvrp.solve import SolveParams, solve
+from pyvrp.solveqci import SolveParamsQci, solveqci
 
 if TYPE_CHECKING:
     from pyvrp.Result import Result
@@ -517,6 +518,45 @@ class Model:
         data = self.data(missing_value)
         return solve(data, stop, seed, collect_stats, display, params)
 
+    def solveqci(
+        self,
+        stop: StoppingCriterion,
+        seed: int = 0,
+        collect_stats: bool = True,
+        display: bool = True,
+        params: SolveParamsQci = SolveParamsQci(),
+        missing_value: int = MAX_VALUE,
+    ) -> Result:
+        """
+        Solve this model.
+
+        Parameters
+        ----------
+        stop
+            Stopping criterion to use.
+        seed
+            Seed value to use for the random number stream. Default 0.
+        collect_stats
+            Whether to collect statistics about the solver's progress. Default
+            ``True``.
+        display
+            Whether to display information about the solver progress. Default
+            ``True``. Progress information is only available when
+            ``collect_stats`` is also set, which it is by default.
+        params
+            Solver parameters to use. If not provided, a default will be used.
+        missing_value
+            Distance and duration value to use for missing edges. Defaults to
+            :const:`~pyvrp.constants.MAX_VALUE`, a large number.
+
+        Returns
+        -------
+        Result
+            A Result object, containing statistics (if collected) and the best
+            found solution.
+        """
+        data = self.data(missing_value)
+        return solveqci(data, stop, seed, collect_stats, display, params)
 
 def _idx_by_id(item: object, container: Sequence[object]) -> int | None:
     """

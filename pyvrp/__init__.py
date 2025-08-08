@@ -26,3 +26,7 @@ from .read import read_solution as read_solution
 from .show_versions import show_versions as show_versions
 from .solve import SolveParams as SolveParams
 from .solve import solve as solve
+from .QuantumInspiredGeneticAlgorithm import QuantumInspiredGeneticAlgorithm as QuantumInspiredGeneticAlgorithm
+from .QuantumInspiredGeneticAlgorithm import QuantumInspiredGeneticAlgorithmParams as QuantumInspiredGeneticAlgorithmParams
+from .solveqci import SolveParamsQci as SolveParamsQci
+from .solveqci import solveqci as solveqci
